@@ -3,11 +3,12 @@ import { Text } from 'react-native';
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { Ionicons } from '@expo/vector-icons';
 
 import Colors from '../constants/Colors';
 import HomeScreen from '../screens/HomeScreen';
-import DetailsScreen from '../screens/DetailsScreen';
+import EditScreen from '../screens/EditScreen';
 import NewTodoScreen from '../screens/NewTodoScreen';
 import StatsScreen from '../screens/StatsScreen';
 
@@ -22,7 +23,7 @@ const DefaultNavOptions = {
 const HomeNavigator = createStackNavigator(
   {
     HomeScreen,
-    DetailsScreen,
+    EditScreen,
     NewTodoScreen
   },
   {
@@ -51,7 +52,7 @@ const BottomTabsNavigator = createMaterialBottomTabNavigator(
       screen: StatsNavigator,
       navigationOptions: {
         tabBarIcon: (tabInfo) => (
-          <Ionicons name="ios-stats" size={20} color={tabInfo.tintColor} />
+          <Ionicons name="md-trending-up" size={20} color={tabInfo.tintColor} />
         ),
         tabBarLabel: <Text style={{ fontSize: 15 }}>Stats</Text>
       }
