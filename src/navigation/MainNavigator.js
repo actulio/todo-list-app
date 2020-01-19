@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import Colors from '../constants/Colors';
 import HomeScreen from '../screens/HomeScreen';
-import EditScreen from '../screens/EditScreen';
+import EditTodoScreen from '../screens/EditTodoScreen';
 import NewTodoScreen from '../screens/NewTodoScreen';
 import StatsScreen from '../screens/StatsScreen';
 
@@ -23,7 +23,7 @@ const DefaultNavOptions = {
 const HomeNavigator = createStackNavigator(
   {
     HomeScreen,
-    EditScreen,
+    EditTodoScreen,
     NewTodoScreen
   },
   {

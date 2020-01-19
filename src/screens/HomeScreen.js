@@ -1,87 +1,110 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native';
-
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Ionicons } from '@expo/vector-icons';
+import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 
-import { Checkbox } from 'react-native-paper';
-
+import MyHeaderButton from '../components/HeaderButton';
+import TodoItem from '../components/TodoItem';
 import Colors from '../constants/Colors';
-
-const mock = [
-  {
-    done: false,
-    title: 'Uma nota',
-    detail: 'Apenas informações sobre essa nota'
-  },
-  {
-    done: false,
-    title: 'Outra nota',
-    detail: ''
-  },
-  {
-    done: true,
-    title: 'Mais uma nota, essa longa!11!',
-    detail: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'
-  }
-];
+import * as AsyncStorageHelper from '../utils/asyncStorageHelper';
 
 const renderListItem = (itemData) => (
-  <View style={styles.itemList}>
-    <View>
-      <Checkbox color="white" />
-    </View>
-    <View style={styles.itemInfo}>
-      <Text style={styles.textTitle}>{itemData.item.title}</Text>
-      {itemData.item.detail.length
-        ? (<Text style={styles.textDetail}>{itemData.item.detail}</Text>) : null}
-    </View>
-  </View>
+  <TodoItem
+    checked={itemData.item.done}
+    id={itemData.item.id}
+    title={itemData.item.title}
+    description={itemData.item.description}
+  />
 );
 
-
 const HomeScreen = (props) => {
-  const [appLoading, setAppLoading] = useState(true);
-  const [todos, setTodos] = useState([]);
+  const [appLoading, setAppLoading] = React.useState(true);
+  const [todos, setTodos] = React.useState([{
+    checked: false, id: '1', title: '', description: ''
+  }]);
+
+  React.useEffect(() => {
+    const didFocusListener = props.navigation.addListener(
+      'didFocus', () => {
+        setAppLoading(true);
+        const getTodos = async () => {
+          setTodos(await AsyncStorageHelper.index());
+        };
+        getTodos();
+        setAppLoading(false);
+      }
+    );
+
+    return function cleanup() {
+      didFocusListener.remove();
+    };
+  },);
 
   return (
     <View style={styles.container}>
 
-      {/* { appLoading && (
-        <ActivityIndicator style={styles.loading} size="large" color={Colors.textColor} animating={appLoading} />
-      )}
-      { todos.length === 0 && !appLoading && (
+      {/* { todos.length === 0 && !appLoading && (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Text style={{ fontSize: 15, fontWeight: 'bold', color: Colors.textColor }}>
             No todos yet.
           </Text>
         </View>
       )} */}
-      <FlatList
-        data={mock}
-        keyExtractor={(item, index) => `item-${index}`}
-        renderItem={renderListItem}
-      />
-      <TouchableOpacity
-        style={styles.addTodoButton}
-        onPress={() => {
-          props.navigation.navigate('NewTodoScreen');
-        }}
-      >
-        <Ionicons name="md-add" size={20} color="black" />
-      </TouchableOpacity>
-
+      { appLoading && (
+        <ActivityIndicator
+          style={styles.loading}
+          size="large"
+          color={Colors.textColor}
+          animating={appLoading}
+        />
+      )}
+      { !appLoading && (
+        <>
+          <FlatList
+            data={todos}
+            keyExtractor={(item, index) => `item-${index}`}
+            renderItem={renderListItem}
+          />
+          <TouchableOpacity
+            style={styles.addTodoButton}
+            onPress={() => {
+              props.navigation.navigate('NewTodoScreen');
+            }}
+          >
+            <Ionicons name="md-add" size={20} color="black" />
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 };
 
+HomeScreen.navigationOptions = () => ({
+  headerTitle: 'TODO list',
+  headerRight: (
+    <View style={styles.headerButtons}>
+      <HeaderButtons HeaderButtonComponent={MyHeaderButton}>
+        <Item
+          title="Filter"
+          iconName="md-funnel"
+        />
+      </HeaderButtons>
+      <HeaderButtons HeaderButtonComponent={MyHeaderButton}>
+        <Item
+          title="settings"
+          iconName="ios-more"
+        />
+      </HeaderButtons>
+    </View>
+  )
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -100,28 +123,13 @@ const styles = StyleSheet.create({
     right: 12,
     backgroundColor: Colors.activeColor,
   },
+  headerButtons: {
+    flexDirection: 'row'
+  },
   loading: {
     flex: 1,
     alignSelf: 'center'
   },
-  itemInfo: {
-    flex: 1,
-    paddingHorizontal: 10,
-  },
-  itemList: {
-    flex: 1,
-    margin: 10,
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  textTitle: {
-    color: Colors.textColor,
-    fontSize: 18
-  },
-  textDetail: {
-    color: Colors.textColor,
-    fontSize: 12
-  }
 });
 
 export default HomeScreen;

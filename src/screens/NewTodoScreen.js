@@ -1,13 +1,17 @@
 import React from 'react';
 import {
-  View, Text, TextInput, StyleSheet, TouchableOpacity
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
-
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Ionicons } from '@expo/vector-icons';
-
 import { withFormik } from 'formik';
+
 import Colors from '../constants/Colors';
+import * as AsyncStorageHelper from '../utils/asyncStorageHelper';
 
 const ErrorText = ({ errorMessage }) => (
   <View>
@@ -155,9 +159,10 @@ const NewTodoScreen = withFormik({
     }
     return errors;
   },
-  handleSubmit: (values, { setSubmitting }) => {
-    console.log(values);
-    setSubmitting(false);
+  handleSubmit: async (values, { props }) => {
+    await AsyncStorageHelper.create(values);
+    props.navigation.goBack();
+    // setSubmitting(false);
   }
 })(InnerForm);
 

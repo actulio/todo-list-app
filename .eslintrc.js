@@ -9,7 +9,7 @@ module.exports = {
     'no-use-before-define': 'off',
 		'react/jsx-filename-extension': 'off',
 		'react-hooks/rules-of-hooks': 'error',
-		'react-hooks/exhaustive-deps': 'warn',
+		// 'react-hooks/exhaustive-deps': 'warn',
     'react/prop-types': 'off',
     'comma-dangle': 'off'
 	},

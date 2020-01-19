@@ -1,13 +1,19 @@
 import React from 'react';
 import {
-  View, Text, TextInput, StyleSheet, TouchableOpacity
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
-
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Ionicons } from '@expo/vector-icons';
-
 import { withFormik } from 'formik';
+import { HeaderButtons, Item } from 'react-navigation-header-buttons';
+
+import MyHeaderButton from '../components/HeaderButton';
 import Colors from '../constants/Colors';
+import * as AsyncStorageHelper from '../utils/asyncStorageHelper';
 
 const ErrorText = ({ errorMessage }) => (
   <View>
@@ -28,14 +34,16 @@ const InnerForm = (props) => {
     navigation
   } = props;
 
-  const id = navigation.getParam('id');
-
   const [isFocused, setIsFocused] = React.useState({
     title: false,
     description: false
   });
-
   const textAreaRef = React.useRef(null);
+
+  React.useEffect(() => {
+    values.title = navigation.getParam('title');
+    values.description = navigation.getParam('description');
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -141,10 +149,13 @@ const styles = StyleSheet.create({
     right: 12,
     backgroundColor: Colors.activeColor,
   },
+  headerButtons: {
+    flexDirection: 'row'
+  },
 });
 
-
 const EditScreen = withFormik({
+  enableReinitialize: true,
   mapPropsToValues: () => ({
     checked: false,
     title: '',
@@ -157,10 +168,29 @@ const EditScreen = withFormik({
     }
     return errors;
   },
-  handleSubmit: (values, { setSubmitting }) => {
-    console.log(values);
-    setSubmitting(false);
+  handleSubmit: async (values, { props }) => {
+    const id = props.navigation.getParam('id');
+    await AsyncStorageHelper.update(id, values);
+    props.navigation.goBack();
   }
 })(InnerForm);
+
+EditScreen.navigationOptions = ({ navigation }) => ({
+  headerRight: (
+    <View style={styles.headerButtons}>
+      <HeaderButtons HeaderButtonComponent={MyHeaderButton}>
+        <Item
+          title="delete"
+          iconName="md-trash"
+          onPress={async () => {
+            const id = navigation.getParam('id');
+            await AsyncStorageHelper.remove(id);
+            navigation.goBack();
+          }}
+        />
+      </HeaderButtons>
+    </View>
+  )
+});
 
 export default EditScreen;
