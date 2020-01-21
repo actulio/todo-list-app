@@ -6,18 +6,32 @@ import { withNavigation } from 'react-navigation';
 import { Checkbox } from 'react-native-paper';
 
 import Colors from '../constants/Colors';
+import * as AsyncStorageHelper from '../utils/asyncStorageHelper';
 
 const TodoItem = (props) => {
   const {
     id, checked, title, description, activeOpacity, navigation
   } = props;
+
+  const [isChecked, setIsChecked] = React.useState(checked);
+
+  React.useEffect(() => {
+    setIsChecked(checked);
+  }, []);
+
+  const setCompleted = async () => {
+    await AsyncStorageHelper.setChecked(id, !isChecked);
+    setIsChecked(!isChecked);
+  };
+
   return (
     <View style={styles.itemList}>
       <View>
         <Checkbox
           color={Colors.activeColor}
-          uncheckedColor="white"
-          status={checked ? 'checked' : 'unchecked'}
+          uncheckedColor={Colors.textColor}
+          status={isChecked ? 'checked' : 'unchecked'}
+          onPress={setCompleted}
         />
       </View>
       <TouchableOpacity

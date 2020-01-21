@@ -5,10 +5,14 @@ import {
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
+  Text
 } from 'react-native';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Ionicons } from '@expo/vector-icons';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
+import { Menu } from 'react-native-paper';
+import { NavigationEvents } from 'react-navigation';
+
 
 import MyHeaderButton from '../components/HeaderButton';
 import TodoItem from '../components/TodoItem';
@@ -17,7 +21,7 @@ import * as AsyncStorageHelper from '../utils/asyncStorageHelper';
 
 const renderListItem = (itemData) => (
   <TodoItem
-    checked={itemData.item.done}
+    checked={itemData.item.checked}
     id={itemData.item.id}
     title={itemData.item.title}
     description={itemData.item.description}
@@ -26,30 +30,39 @@ const renderListItem = (itemData) => (
 
 const HomeScreen = (props) => {
   const [appLoading, setAppLoading] = React.useState(true);
-  const [todos, setTodos] = React.useState([{
-    checked: false, id: '1', title: '', description: ''
-  }]);
+  const [todos, setTodos] = React.useState([]);
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = React.useState(false);
+  const [isModeMenuOpen, setIsModeMenuOpen] = React.useState(false);
+
+  const toggleFilterMenuHandler = React.useCallback(() => {
+    setIsFilterMenuOpen(!isFilterMenuOpen);
+  }, [isFilterMenuOpen]);
+
+  const toggleModeMenuHandler = React.useCallback(() => {
+    setIsModeMenuOpen(!isModeMenuOpen);
+  }, [isModeMenuOpen]);
 
   React.useEffect(() => {
-    const didFocusListener = props.navigation.addListener(
-      'didFocus', () => {
-        setAppLoading(true);
-        const getTodos = async () => {
-          setTodos(await AsyncStorageHelper.index());
-        };
-        getTodos();
-        setAppLoading(false);
-      }
-    );
+    props.navigation.setParams({ toggleFilterMenu: toggleFilterMenuHandler });
+    props.navigation.setParams({ isFilterMenuOpen });
+  }, [toggleFilterMenuHandler, isFilterMenuOpen]);
 
-    return function cleanup() {
-      didFocusListener.remove();
-    };
-  },);
+  React.useEffect(() => {
+    props.navigation.setParams({ toggleModeMenu: toggleModeMenuHandler });
+    props.navigation.setParams({ isModeMenuOpen });
+  }, [toggleModeMenuHandler, isModeMenuOpen]);
+
+  const handleWillFocus = async () => {
+    // setAppLoading(true);
+    setTodos(await AsyncStorageHelper.index());
+    // setAppLoading(false);
+  };
 
   return (
     <View style={styles.container}>
-
+      <NavigationEvents
+        onWillFocus={handleWillFocus}
+      />
       {/* { todos.length === 0 && !appLoading && (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Text style={{ fontSize: 15, fontWeight: 'bold', color: Colors.textColor }}>
@@ -86,25 +99,62 @@ const HomeScreen = (props) => {
   );
 };
 
-HomeScreen.navigationOptions = () => ({
-  headerTitle: 'TODO list',
-  headerRight: (
-    <View style={styles.headerButtons}>
-      <HeaderButtons HeaderButtonComponent={MyHeaderButton}>
-        <Item
-          title="Filter"
-          iconName="md-funnel"
-        />
-      </HeaderButtons>
-      <HeaderButtons HeaderButtonComponent={MyHeaderButton}>
-        <Item
-          title="settings"
-          iconName="ios-more"
-        />
-      </HeaderButtons>
-    </View>
-  )
-});
+HomeScreen.navigationOptions = (navData) => {
+  const isFilterMenuOpen = navData.navigation.getParam('isFilterMenuOpen');
+  const toggleFilterMenu = navData.navigation.getParam('toggleFilterMenu');
+
+  const isModeMenuOpen = navData.navigation.getParam('isModeMenuOpen');
+  const toggleModeMenu = navData.navigation.getParam('toggleModeMenu');
+
+  return {
+    headerTitle: 'TODO list',
+    headerRight: (
+      <View style={styles.headerButtons}>
+        <Menu
+          visible={isFilterMenuOpen}
+          onDismiss={toggleFilterMenu}
+          contentStyle={{ backgroundColor: Colors.backgroundColor }}
+          anchor={(
+            <HeaderButtons HeaderButtonComponent={MyHeaderButton}>
+              <Item
+                title="Filter"
+                iconName="md-funnel"
+                onPress={toggleFilterMenu}
+              />
+            </HeaderButtons>
+          )}
+        >
+          <Menu.Item onPress={() => { }} theme={{ colors: { text: 'white' } }} title="Show All" />
+          <Menu.Item onPress={() => { }} theme={{ colors: { text: 'white' } }} title="Show Active" />
+          <Menu.Item onPress={() => { }} theme={{ colors: { text: 'white' } }} title="Show Completed" />
+        </Menu>
+
+        <Menu
+          visible={isModeMenuOpen}
+          onDismiss={toggleModeMenu}
+          contentStyle={{ backgroundColor: Colors.backgroundColor }}
+          anchor={(
+            <HeaderButtons HeaderButtonComponent={MyHeaderButton}>
+              <Item
+                title="Filter"
+                iconName="ios-more"
+                onPress={toggleModeMenu}
+              />
+            </HeaderButtons>
+              )}
+        >
+          {/* <View style={styles.OverflowMenu}>
+            <Text>ALo</Text>
+            <Text>Oie</Text>
+          </View> */}
+          <Menu.Item onPress={() => { }} theme={{ colors: { text: 'white' } }} title="Mark all complete" />
+          <Menu.Item onPress={() => { }} theme={{ colors: { text: 'white' } }} title="Clear completed" />
+        </Menu>
+      </View>
+
+    )
+  };
+};
 
 const styles = StyleSheet.create({
   container: {

@@ -17,7 +17,7 @@ import * as AsyncStorageHelper from '../utils/asyncStorageHelper';
 
 const ErrorText = ({ errorMessage }) => (
   <View>
-    <Text style={{ color: 'red' }}>
+    <Text style={{ color: Colors.errorColor }}>
       {errorMessage}
     </Text>
   </View>
@@ -104,7 +104,7 @@ const InnerForm = (props) => {
       </View>
 
       <TouchableOpacity style={styles.addTodoButton} onPress={handleSubmit}>
-        <Ionicons name="md-add" size={20} color="black" />
+        <Ionicons name="md-checkmark" size={20} color="black" />
       </TouchableOpacity>
 
     </View>

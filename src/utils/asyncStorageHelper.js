@@ -24,9 +24,9 @@ const create = async (values) => {
 
 const update = async (id, values) => {
   const { description, title } = values;
-  const todos = JSON.parse(await AsyncStorage.getItem(APPID));
-  const updatedTodos = todos.map((todo) => (todo.id === id ? { id, description, title } : todo));
   try {
+    const todos = JSON.parse(await AsyncStorage.getItem(APPID));
+    const updatedTodos = todos.map((todo) => (todo.id === id ? { id, description, title } : todo));
     await AsyncStorage.setItem(APPID, JSON.stringify(updatedTodos));
   } catch (error) {
     Alert.alert(
@@ -37,9 +37,9 @@ const update = async (id, values) => {
 };
 
 const remove = async (id) => {
-  const todos = JSON.parse(await AsyncStorage.getItem(APPID));
-  const updatedTodos = todos.filter((todo) => todo.id !== id);
   try {
+    const todos = JSON.parse(await AsyncStorage.getItem(APPID));
+    const updatedTodos = todos.filter((todo) => todo.id !== id);
     await AsyncStorage.setItem(APPID, JSON.stringify(updatedTodos));
   } catch (error) {
     Alert.alert(
@@ -51,9 +51,24 @@ const remove = async (id) => {
 
 const index = async () => JSON.parse(await AsyncStorage.getItem(APPID));
 
+const setChecked = async (id, checked) => {
+  try {
+    const todos = JSON.parse(await AsyncStorage.getItem(APPID));
+    const updatedTodos = todos.map((todo) => (todo.id === id ? { ...todo, checked } : todo));
+    await AsyncStorage.setItem(APPID, JSON.stringify(updatedTodos));
+  } catch (error) {
+    Alert.alert(
+      'Error removing todo',
+      error
+    );
+  }
+};
+
+
 export {
   update,
   create,
   remove,
-  index
+  index,
+  setChecked
 };
