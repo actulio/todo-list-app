@@ -17,7 +17,10 @@ const DefaultNavOptions = {
   headerStyle: {
     backgroundColor: Colors.headerColor
   },
-  headerTintColor: 'white'
+  headerTintColor: 'white',
+  headerTitleStyle: {
+    fontFamily: 'Roboto_400Regular'
+  },
 };
 
 const HomeNavigator = createStackNavigator(
@@ -45,7 +48,7 @@ const BottomTabsNavigator = createMaterialBottomTabNavigator(
         tabBarIcon: (tabInfo) => (
           <Ionicons name="ios-list" size={20} color={tabInfo.tintColor} />
         ),
-        tabBarLabel: <Text style={{ fontSize: 15 }}>Todos</Text>
+        tabBarLabel: <Text style={{ fontSize: 15, fontFamily: 'Roboto_400Regular' }}>Todos</Text>
       }
     },
     Stats: {
@@ -54,7 +57,7 @@ const BottomTabsNavigator = createMaterialBottomTabNavigator(
         tabBarIcon: (tabInfo) => (
           <Ionicons name="md-trending-up" size={20} color={tabInfo.tintColor} />
         ),
-        tabBarLabel: <Text style={{ fontSize: 15 }}>Stats</Text>
+        tabBarLabel: <Text style={{ fontSize: 15, fontFamily: 'Roboto_400Regular' }}>Stats</Text>
       }
     },
   },

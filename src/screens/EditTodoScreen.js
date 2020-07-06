@@ -9,11 +9,9 @@ import {
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Ionicons } from '@expo/vector-icons';
 import { withFormik } from 'formik';
-import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 
-import MyHeaderButton from '../components/HeaderButton';
 import Colors from '../constants/Colors';
-import * as AsyncStorageHelper from '../utils/asyncStorageHelper';
+import { EDIT_TODO, REMOVE_TODO } from '../contexts/todoReducer';
 
 const ErrorText = ({ errorMessage }) => (
   <View>
@@ -41,6 +39,7 @@ const InnerForm = (props) => {
   const textAreaRef = React.useRef(null);
 
   React.useEffect(() => {
+    values.checked = navigation.getParam('checked');
     values.title = navigation.getParam('title');
     values.description = navigation.getParam('description');
   }, []);
@@ -111,6 +110,51 @@ const InnerForm = (props) => {
   );
 };
 
+const EditScreen = withFormik({
+  enableReinitialize: true,
+  mapPropsToValues: () => ({
+    checked: false,
+    title: '',
+    description: ''
+  }),
+  validate: (values) => {
+    const errors = {};
+    if (!values.title) {
+      errors.title = 'The title is required!';
+    }
+    return errors;
+  },
+  handleSubmit: async (values, { props }) => {
+    const id = props.navigation.getParam('id');
+    const dispatch = props.navigation.getParam('dispatch');
+    dispatch(EDIT_TODO, {
+      id,
+      ...values,
+    });
+    props.navigation.goBack();
+  }
+})(InnerForm);
+
+EditScreen.navigationOptions = ({ navigation }) => ({
+  headerRight: (
+    <View style={styles.menu}>
+      <TouchableOpacity
+        style={styles.menu}
+        onPress={() => {
+          const dispatch = navigation.getParam('dispatch');
+          dispatch(
+            REMOVE_TODO,
+            { id: navigation.getParam('id') }
+          );
+          navigation.goBack();
+        }}
+      >
+        <Ionicons name="md-trash" size={28} color={Colors.textColor} />
+      </TouchableOpacity>
+    </View>
+  )
+});
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -152,45 +196,12 @@ const styles = StyleSheet.create({
   headerButtons: {
     flexDirection: 'row'
   },
-});
-
-const EditScreen = withFormik({
-  enableReinitialize: true,
-  mapPropsToValues: () => ({
-    checked: false,
-    title: '',
-    description: ''
-  }),
-  validate: (values) => {
-    const errors = {};
-    if (!values.title) {
-      errors.title = 'The title is required!';
-    }
-    return errors;
-  },
-  handleSubmit: async (values, { props }) => {
-    const id = props.navigation.getParam('id');
-    await AsyncStorageHelper.update(id, values);
-    props.navigation.goBack();
+  menu: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 40,
+    height: 40,
   }
-})(InnerForm);
-
-EditScreen.navigationOptions = ({ navigation }) => ({
-  headerRight: (
-    <View style={styles.headerButtons}>
-      <HeaderButtons HeaderButtonComponent={MyHeaderButton}>
-        <Item
-          title="delete"
-          iconName="md-trash"
-          onPress={async () => {
-            const id = navigation.getParam('id');
-            await AsyncStorageHelper.remove(id);
-            navigation.goBack();
-          }}
-        />
-      </HeaderButtons>
-    </View>
-  )
 });
 
 export default EditScreen;

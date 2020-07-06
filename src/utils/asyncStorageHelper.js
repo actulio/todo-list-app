@@ -1,6 +1,7 @@
-import { AsyncStorage, Alert } from 'react-native';
+import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 
-const APPID = 'todo-list-app';
+const APPID = 'com.actulio.todo-list-app';
 
 const uid = () => {
   const date = new Date();
@@ -9,59 +10,118 @@ const uid = () => {
 
 const create = async (values) => {
   const id = uid();
+  let newTodos;
 
   try {
-    const oldTodos = JSON.parse(await AsyncStorage.getItem(APPID));
-    const newTodos = [...oldTodos, { ...values, id }];
+    const todos = JSON.parse(await AsyncStorage.getItem(APPID));
+    newTodos = todos ? [...todos, { ...values, id }] : [{ ...values, id }];
     await AsyncStorage.setItem(APPID, JSON.stringify(newTodos));
   } catch (error) {
     Alert.alert(
       'Error adding todo',
-      error
+      error.message
     );
   }
+  return newTodos || [];
 };
 
 const update = async (id, values) => {
-  const { description, title } = values;
+  let updatedTodos;
   try {
     const todos = JSON.parse(await AsyncStorage.getItem(APPID));
-    const updatedTodos = todos.map((todo) => (todo.id === id ? { id, description, title } : todo));
+    updatedTodos = todos.map((todo) => (todo.id === id ? { id, ...values } : todo));
     await AsyncStorage.setItem(APPID, JSON.stringify(updatedTodos));
   } catch (error) {
     Alert.alert(
       'Error updating todo',
-      error
+      error.message
     );
   }
+  return updatedTodos || [];
 };
 
 const remove = async (id) => {
+  let updatedTodos;
   try {
     const todos = JSON.parse(await AsyncStorage.getItem(APPID));
-    const updatedTodos = todos.filter((todo) => todo.id !== id);
+    updatedTodos = todos.filter((todo) => todo.id !== id);
     await AsyncStorage.setItem(APPID, JSON.stringify(updatedTodos));
   } catch (error) {
     Alert.alert(
       'Error removing todo',
-      error
+      error.message
+    );
+  }
+  return updatedTodos || [];
+};
+
+const index = async () => {
+  let todos;
+  try {
+    todos = JSON.parse(await AsyncStorage.getItem(APPID));
+  } catch (error) {
+    Alert.alert(
+      'Error getting all todos',
+      error.message
+    );
+  }
+  return todos === null ? [] : todos;
+};
+
+const setChecked = async (id, checked) => {
+  let updatedTodos;
+  try {
+    const todos = JSON.parse(await AsyncStorage.getItem(APPID));
+    updatedTodos = todos.map((todo) => (todo.id === id ? { checked, ...todo } : todo));
+    await AsyncStorage.setItem(APPID, JSON.stringify(updatedTodos));
+  } catch (error) {
+    Alert.alert(
+      'Error updating todo',
+      error.message
+    );
+  }
+  return updatedTodos || [];
+};
+
+const debugRemoveAll = async () => {
+  try {
+    await AsyncStorage.removeItem(APPID);
+  } catch (error) {
+    Alert.alert(
+      'Error removing all todos',
+      error.message
     );
   }
 };
 
-const index = async () => JSON.parse(await AsyncStorage.getItem(APPID));
-
-const setChecked = async (id, checked) => {
+const markAll = async () => {
+  let updatedTodos;
   try {
     const todos = JSON.parse(await AsyncStorage.getItem(APPID));
-    const updatedTodos = todos.map((todo) => (todo.id === id ? { ...todo, checked } : todo));
+    updatedTodos = todos.map((todo) => (todo.checked ? todo : { ...todo, checked: true }));
     await AsyncStorage.setItem(APPID, JSON.stringify(updatedTodos));
   } catch (error) {
     Alert.alert(
-      'Error removing todo',
-      error
+      'Error updating todo',
+      error.message
     );
   }
+  return updatedTodos || [];
+};
+
+const clearAll = async () => {
+  let updatedTodos;
+  try {
+    const todos = JSON.parse(await AsyncStorage.getItem(APPID));
+    updatedTodos = todos.map((todo) => (todo.checked ? { ...todo, checked: false } : todo));
+    await AsyncStorage.setItem(APPID, JSON.stringify(updatedTodos));
+  } catch (error) {
+    Alert.alert(
+      'Error updating todo',
+      error.message
+    );
+  }
+  return updatedTodos || [];
 };
 
 
@@ -70,5 +130,8 @@ export {
   create,
   remove,
   index,
-  setChecked
+  setChecked,
+  markAll,
+  clearAll,
+  debugRemoveAll
 };

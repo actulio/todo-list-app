@@ -8,10 +8,11 @@ import {
 } from 'react-native';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Ionicons } from '@expo/vector-icons';
-import { withFormik } from 'formik';
+import { withFormik, useFormik } from 'formik';
 
 import Colors from '../constants/Colors';
-import * as AsyncStorageHelper from '../utils/asyncStorageHelper';
+import TodoContext from '../contexts/todoContext';
+import { CREATE_TODO } from '../contexts/todoReducer';
 
 const ErrorText = ({ errorMessage }) => (
   <View>
@@ -21,7 +22,29 @@ const ErrorText = ({ errorMessage }) => (
   </View>
 );
 
-const InnerForm = (props) => {
+const NewTodoScreen = (props) => {
+  const context = React.useContext(TodoContext);
+
+  const formik = useFormik({
+    initialValues: {
+      checked: false,
+      title: '',
+      description: ''
+    },
+    validate: (values) => {
+      const errors = {};
+      if (!values.title) {
+        errors.title = 'The title is required!';
+      }
+      return errors;
+    },
+    onSubmit: async (values) => {
+      context.dispatch(CREATE_TODO, values);
+      props.navigation.goBack();
+      // setSubmitting(false);
+    }
+  });
+
   const {
     values,
     errors,
@@ -29,7 +52,8 @@ const InnerForm = (props) => {
     handleChange,
     handleBlur,
     handleSubmit
-  } = props;
+  } = formik;
+
 
   const [isFocused, setIsFocused] = React.useState({
     title: false,
@@ -146,24 +170,24 @@ const styles = StyleSheet.create({
 });
 
 
-const NewTodoScreen = withFormik({
-  mapPropsToValues: () => ({
-    checked: false,
-    title: '',
-    description: ''
-  }),
-  validate: (values) => {
-    const errors = {};
-    if (!values.title) {
-      errors.title = 'The title is required!';
-    }
-    return errors;
-  },
-  handleSubmit: async (values, { props }) => {
-    await AsyncStorageHelper.create(values);
-    props.navigation.goBack();
-    // setSubmitting(false);
-  }
-})(InnerForm);
+// const NewTodoScreen = withFormik({
+//   mapPropsToValues: () => ({
+//     checked: false,
+//     title: '',
+//     description: ''
+//   }),
+//   validate: (values) => {
+//     const errors = {};
+//     if (!values.title) {
+//       errors.title = 'The title is required!';
+//     }
+//     return errors;
+//   },
+//   handleSubmit: async (values, { props }) => {
+//     await AsyncStorageHelper.create(values);
+//     props.navigation.goBack();
+//     // setSubmitting(false);
+//   }
+// })(InnerForm);
 
 export default NewTodoScreen;

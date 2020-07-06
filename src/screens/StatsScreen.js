@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 18,
     color: Colors.textColor,
-    fontWeight: 'bold'
+    fontFamily: 'Roboto_700Bold'
   }
 });
 

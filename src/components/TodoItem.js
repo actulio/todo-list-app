@@ -6,12 +6,16 @@ import { withNavigation } from 'react-navigation';
 import { Checkbox } from 'react-native-paper';
 
 import Colors from '../constants/Colors';
-import * as AsyncStorageHelper from '../utils/asyncStorageHelper';
+import TodoContext from '../contexts/todoContext';
+import { SET_CHECKED } from '../contexts/todoReducer';
+
 
 const TodoItem = (props) => {
   const {
     id, checked, title, description, activeOpacity, navigation
   } = props;
+
+  const context = React.useContext(TodoContext);
 
   const [isChecked, setIsChecked] = React.useState(checked);
 
@@ -20,7 +24,7 @@ const TodoItem = (props) => {
   }, []);
 
   const setCompleted = async () => {
-    await AsyncStorageHelper.setChecked(id, !isChecked);
+    context.dispatch(SET_CHECKED, { id });
     setIsChecked(!isChecked);
   };
 
@@ -41,14 +45,17 @@ const TodoItem = (props) => {
           if (activeOpacity !== 1) {
             navigation.navigate({
               routeName: 'EditTodoScreen',
-              params: { id, description, title }
+              params: {
+                id, description, title, checked, dispatch: context.dispatch
+              }
             });
           }
         }}
       >
         <Text style={styles.textTitle}>{title}</Text>
-        {description.length
-          ? (<Text style={styles.textDetail}>{description}</Text>) : null}
+        {description
+          ? (<Text style={styles.textDetail}>{description}</Text>)
+          : null}
       </TouchableOpacity>
     </View>
   );
@@ -67,12 +74,14 @@ const styles = StyleSheet.create({
   },
   textTitle: {
     color: Colors.textColor,
-    fontSize: 18
+    fontSize: 18,
+    fontFamily: 'Roboto_400Regular'
   },
   textDetail: {
     color: Colors.textColor,
     fontSize: 14,
-    paddingTop: 5
+    paddingTop: 5,
+    fontFamily: 'Roboto_400Regular'
   }
 });
 
