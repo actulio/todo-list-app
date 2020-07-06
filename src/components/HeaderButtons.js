@@ -14,34 +14,22 @@ import {
 const HeaderButtons = () => {
   const [isFilterMenuOpen, setIsFilterMenuOpen] = React.useState(false);
   const [isOptionsMenuOpen, setIsOptionsMenuOpen] = React.useState(false);
+  const [currentSelection, setCurrentSelection] = React.useState(SHOW_ALL);
 
   const context = React.useContext(TodoContext);
 
-  function clearCompleted() {
+  function getSelection(selection) {
     setIsOptionsMenuOpen(false);
-    context.dispatch(CLEAR_ALL);
-  }
-
-  function markAllTodos() {
-    setIsOptionsMenuOpen(false);
-    context.dispatch(MARK_ALL);
-  }
-
-  function showAll() {
     setIsFilterMenuOpen(false);
-    context.dispatch(SHOW_ALL);
-  }
 
-  function showActive() {
-    setIsFilterMenuOpen(false);
-    context.dispatch(SHOW_ACTIVE);
-  }
+    if (selection === CLEAR_ALL || selection === MARK_ALL) {
+      setTimeout(() => setCurrentSelection(SHOW_ALL), 200);
+    } else {
+      setTimeout(() => setCurrentSelection(selection), 200);
+    }
 
-  function showCompleted() {
-    setIsFilterMenuOpen(false);
-    context.dispatch(SHOW_COMPLETED);
+    context.dispatch(selection);
   }
-
 
   return (
     <View style={styles.headerButtons}>
@@ -60,9 +48,30 @@ const HeaderButtons = () => {
           </View>
       )}
       >
-        <Menu.Item onPress={showAll} theme={{ colors: { text: 'white' } }} title="Show All" />
-        <Menu.Item onPress={showActive} theme={{ colors: { text: 'white' } }} title="Show Active" />
-        <Menu.Item onPress={showCompleted} theme={{ colors: { text: 'white' } }} title="Show Completed" />
+        <Menu.Item
+          onPress={() => getSelection(SHOW_ALL)}
+          theme={{
+            colors:
+              { text: currentSelection === SHOW_ALL ? Colors.activeColor : Colors.textColor }
+          }}
+          title="Show All"
+        />
+        <Menu.Item
+          onPress={() => getSelection(SHOW_ACTIVE)}
+          theme={{
+            colors:
+              { text: currentSelection === SHOW_ACTIVE ? Colors.activeColor : Colors.textColor }
+          }}
+          title="Show Active"
+        />
+        <Menu.Item
+          onPress={() => getSelection(SHOW_COMPLETED)}
+          theme={{
+            colors:
+              { text: currentSelection === SHOW_COMPLETED ? Colors.activeColor : Colors.textColor }
+          }}
+          title="Show Completed"
+        />
       </Menu>
 
       <Menu
@@ -80,8 +89,8 @@ const HeaderButtons = () => {
           </View>
           )}
       >
-        <Menu.Item onPress={markAllTodos} theme={{ colors: { text: 'white' } }} title="Mark all complete" />
-        <Menu.Item onPress={clearCompleted} theme={{ colors: { text: 'white' } }} title="Clear completed" />
+        <Menu.Item onPress={() => getSelection(MARK_ALL)} theme={{ colors: { text: 'white' } }} title="Mark all complete" />
+        <Menu.Item onPress={() => getSelection(CLEAR_ALL)} theme={{ colors: { text: 'white' } }} title="Clear completed" />
       </Menu>
     </View>
   );

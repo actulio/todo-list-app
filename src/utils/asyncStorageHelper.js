@@ -72,7 +72,7 @@ const setChecked = async (id, checked) => {
   let updatedTodos;
   try {
     const todos = JSON.parse(await AsyncStorage.getItem(APPID));
-    updatedTodos = todos.map((todo) => (todo.id === id ? { checked, ...todo } : todo));
+    updatedTodos = todos.map((todo) => (todo.id === id ? { ...todo, checked } : todo));
     await AsyncStorage.setItem(APPID, JSON.stringify(updatedTodos));
   } catch (error) {
     Alert.alert(
