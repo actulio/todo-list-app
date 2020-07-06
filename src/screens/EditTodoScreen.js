@@ -136,6 +136,7 @@ const EditScreen = withFormik({
 })(InnerForm);
 
 EditScreen.navigationOptions = ({ navigation }) => ({
+  headerTitle: 'Edit Todo',
   headerRight: (
     <View style={styles.menu}>
       <TouchableOpacity
